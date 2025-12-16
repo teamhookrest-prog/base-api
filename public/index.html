@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="id" class="bg-gray-50">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>API Documentation</title>
+  <link rel="icon" href="icon.png" type="image/png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Gunakan font sistem */
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Animasi halus untuk semua transisi */
+    * {
+      transition-property: color, background-color, border-color, transform, opacity;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 300ms;
+    }
+    
+    .wrap-url { 
+      word-break: break-all; 
+      overflow-wrap: break-word; 
+      line-height: 1.5;
+    }
+    
+    .wrap-response { 
+      white-space: pre-wrap; 
+      word-break: break-word;
+      line-height: 1.5;
+    }
+    
+    /* Card dengan animasi masuk yang smooth */
+    .endpoint-card { 
+      border: 1px solid #e5e7eb;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: cardAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    @keyframes cardAppear {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Hover effect untuk card yang elegan */
+    .endpoint-card:hover { 
+      border-color: #9ca3af;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+    
+    /* Tombol Execute yang lebih modern */
+    .execute-btn {
+      background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+      color: white;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+      border: none;
+    }
+    
+    .execute-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(31, 41, 55, 0.15);
+    }
+    
+    .execute-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    .execute-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    /* Ripple effect untuk tombol */
+    .execute-btn::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+      background-repeat: no-repeat;
+      background-position: 50%;
+      transform: scale(10, 10);
+      opacity: 0;
+      transition: transform .5s, opacity 1s;
+    }
+    
+    .execute-btn:active::after {
+      transform: scale(0, 0);
+      opacity: .3;
+      transition: 0s;
+    }
+    
+    /* Filter kategori yang lebih rapi */
+    .category-filter {
+      padding: 8px 16px;
+      border: 1px solid #e5e7eb;
+      background-color: white;
+      color: #4b5563;
+      font-weight: 500;
+      font-size: 0.875rem;
+      border-radius: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    .category-filter:hover {
+      border-color: #9ca3af;
+      color: #1f2937;
+      background-color: #f9fafb;
+    }
+    
+    .category-filter.active-filter {
+      border-color: #1f2937;
+      background-color: #1f2937;
+      color: white;
+    }
+    
+    /* PERUBAHAN: Filter kategori horizontal scroll */
+    #categories-nav {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      padding-bottom: 12px;
+      margin-bottom: -8px;
+      scrollbar-width: thin;
+      scrollbar-color: #d1d5db #f3f4f6;
+      -webkit-overflow-scrolling: touch;
+      gap: 8px;
+      flex-wrap: nowrap;
+      max-width: 100%;
+    }
+    
+    /* Scrollbar styling untuk Webkit browsers */
+    #categories-nav::-webkit-scrollbar {
+      height: 6px;
+    }
+    
+    #categories-nav::-webkit-scrollbar-track {
+      background: #f3f4f6;
+      border-radius: 3px;
+    }
+    
+    #categories-nav::-webkit-scrollbar-thumb {
+      background-color: #d1d5db;
+      border-radius: 3px;
+    }
+    
+    #categories-nav::-webkit-scrollbar-thumb:hover {
+      background-color: #9ca3af;
+    }
+    
+    /* Badge metode dengan glow effect subtle */
+    .method-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 6px;
+      color: white;
+      letter-spacing: 0.025em;
+      min-width: 60px;
+    }
+    
+    /* Warna metode yang lebih vibrant */
+    .method-badge-get { 
+      background-color: #10b981;
+      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+    }
+    .method-badge-post { 
+      background-color: #3b82f6;
+      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    }
+    .method-badge-delete { 
+      background-color: #ef4444;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.1);
+    }
+    .method-badge-put { 
+      background-color: #f59e0b;
+      box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+    }
+    .method-badge-patch { 
+      background-color: #8b5cf6;
+      box-shadow: 0 2px 4px rgba(139, 92, 246, 0.1);
+    }
+    
+    /* Tabel status dengan design modern */
+    .status-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .status-table tr {
+      transition: background-color 0.2s;
+    }
+    
+    .status-table tr:hover {
+      background-color: #f9fafb;
+    }
+    
+    /* Input dengan animasi focus yang smooth */
+    input:focus, button:focus, textarea:focus {
+      outline: none;
+      border-color: #1f2937;
+      box-shadow: 0 0 0 2px rgba(31, 41, 55, 0.1);
+    }
+    
+    /* Animasi fade in dengan delay */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    /* Animasi slide down untuk detail panel */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+      to {
+        opacity: 1;
+        max-height: 2000px;
+      }
+    }
+    
+    .slide-down {
+      animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      overflow: hidden;
+    }
+    
+    /* Scrollbar custom yang lebih halus */
+    pre::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    pre::-webkit-scrollbar-track {
+      background: #1f2937;
+      border-radius: 3px;
+    }
+    
+    pre::-webkit-scrollbar-thumb {
+      background: #4b5563;
+      border-radius: 3px;
+      transition: background 0.3s;
+    }
+    
+    pre::-webkit-scrollbar-thumb:hover {
+      background: #6b7280;
+    }
+    
+    /* Loading animation yang lebih smooth */
+    .loading-dots {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .loading-dots span {
+      width: 6px;
+      height: 6px;
+      margin: 0 2px;
+      background-color: currentColor;
+      border-radius: 50%;
+      display: inline-block;
+      animation: dotPulse 1.4s infinite ease-in-out both;
+    }
+    
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes dotPulse {
+      0%, 80%, 100% { 
+        transform: scale(0);
+        opacity: 0.5;
+      }
+      40% { 
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    /* Copy button animation yang smooth */
+    @keyframes copySuccess {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .copy-success {
+      animation: copySuccess 0.3s ease;
+    }
+    
+    /* Banner container dengan border saja */
+    .banner-container {
+      width: 100%;
+      aspect-ratio: 16/9;
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 32px;
+      border: 1px solid #e5e7eb;
+      background: white;
+    }
+    
+    .banner-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .banner-container:hover img {
+      transform: scale(1.02);
+    }
+    
+    /* Gradient text untuk header */
+    .gradient-text {
+      background: linear-gradient(135deg, #1f2937 0%, #4b5563 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container-padding {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      
+      .banner-container {
+        margin-bottom: 24px;
+        border-radius: 8px;
+      }
+      
+      .method-badge {
+        min-width: 50px;
+        padding: 4px 8px;
+        font-size: 0.7rem;
+      }
+      
+      .endpoint-card {
+        border-radius: 8px;
+      }
+      
+      .execute-btn {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+      }
+      
+      .category-filter {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+      }
+      
+      h1 {
+        font-size: 1.75rem;
+      }
+      
+      h2, h3, h4 {
+        font-size: 1.1rem;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .grid-cols-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      
+      .banner-container {
+        aspect-ratio: 16/9;
+      }
+      
+      /* PERUBAHAN: Mobile scroll lebih baik */
+      #categories-nav {
+        padding-bottom: 10px;
+        margin-bottom: -6px;
+      }
+      
+      #categories-nav::-webkit-scrollbar {
+        height: 4px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .execute-btn {
+        width: 100%;
+      }
+      
+      /* PERUBAHAN: Kategori filter di mobile tetap horizontal scroll */
+      .category-filter {
+        min-width: auto;
+        text-align: center;
+      }
+      
+      #categories-nav {
+        gap: 6px;
+      }
+    }
+    
+    /* Smooth scroll untuk seluruh halaman */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Selection color yang lebih soft */
+    ::selection {
+      background-color: rgba(31, 41, 55, 0.1);
+      color: #1f2937;
+    }
+    
+    /* Animation untuk stat counters */
+    @keyframes countUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .count-animate {
+      animation: countUp 0.6s ease-out forwards;
+    }
+    
+    /* Button groups untuk responsif */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    @media (max-width: 640px) {
+      .button-group {
+        justify-content: center;
+      }
+      
+      .button-group button {
+        flex: 1;
+        min-width: 120px;
+      }
+    }
+    
+    /* Better spacing untuk mobile */
+    .mobile-spacing {
+      padding: 16px;
+    }
+    
+    /* Improved code block responsiveness */
+    pre {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    
+    /* Table responsiveness */
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Better touch targets untuk mobile */
+    button, 
+    .category-filter,
+    input[type="text"] {
+      min-height: 44px;
+    }
+    
+    /* Optimasi untuk layar kecil */
+    @media (max-width: 360px) {
+      .container-padding {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      
+      .text-4xl {
+        font-size: 1.5rem;
+      }
+      
+      .text-lg {
+        font-size: 0.95rem;
+      }
+      
+      /* PERUBAHAN: Kategori filter lebih kecil di mobile */
+      .category-filter {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased text-gray-900">
+  <div class="max-w-7xl mx-auto px-4 py-6 sm:py-8 container-padding">
+    
+    <!-- Banner dengan border saja -->
+    <div class="banner-container fade-in-up">
+      <img id="api-banner" src="banner.png" alt="API Documentation Banner" 
+           onerror="this.onerror=null; this.style.display='none'">
+    </div>
+
+    <!-- Header dengan animasi -->
+    <header class="mb-8 sm:mb-12 text-center fade-in-up" style="animation-delay: 100ms">
+      <h1 class="text-3xl sm:text-4xl font-bold gradient-text mb-2 sm:mb-3">API Documentation</h1>
+      <p class="text-gray-600 text-base sm:text-lg max-w-3xl mx-auto px-2 sm:px-0">
+        Integration made easy. Explore all available endpoints with clear documentation.
+      </p>
+      
+      <!-- Stats dengan animasi -->
+      <div class="mt-6 sm:mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto stats-grid">
+        <div class="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+          <div class="text-xl sm:text-2xl font-bold text-gray-900 count-animate" id="total-endpoints">0</div>
+          <div class="text-xs sm:text-sm text-gray-600">Total Endpoints</div>
+        </div>
+        <div class="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+          <div class="text-xl sm:text-2xl font-bold text-gray-900 count-animate" id="total-categories" style="animation-delay: 150ms">0</div>
+          <div class="text-xs sm:text-sm text-gray-600">Categories</div>
+        </div>
+        <div class="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+          <div class="text-xl sm:text-2xl font-bold text-gray-900 count-animate" id="active-category" style="animation-delay: 200ms">All</div>
+          <div class="text-xs sm:text-sm text-gray-600">Active Category</div>
+        </div>
+        <div class="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+          <div class="text-xl sm:text-2xl font-bold text-gray-900 count-animate" id="filtered-count" style="animation-delay: 250ms">0</div>
+          <div class="text-xs sm:text-sm text-gray-600">Displayed</div>
+        </div>
+      </div>
+      
+      <!-- Quick actions dengan button group -->
+      <div class="mt-4 sm:mt-6 flex flex-wrap gap-2 sm:gap-3 justify-center button-group">
+        <button id="expand-all" class="px-3 sm:px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 border border-gray-300 transition-colors">
+          Expand All
+        </button>
+        <button id="collapse-all" class="px-3 sm:px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 border border-gray-300 transition-colors">
+          Collapse All
+        </button>
+        <button id="export-json" class="px-3 sm:px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 border border-gray-300 transition-colors">
+          Export JSON
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Search bar dengan design clean -->
+      <div class="mb-6 sm:mb-8 fade-in-up" style="animation-delay: 200ms">
+        <div class="max-w-2xl mx-auto">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input type="text" 
+                   id="search-endpoints" 
+                   placeholder="Search endpoints by name, description, or path..." 
+                   class="w-full pl-10 sm:pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 outline-none text-sm sm:text-base bg-white"
+                   autocomplete="off">
+            <div class="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center pointer-events-none">
+              <span class="text-xs text-gray-400" id="search-count">0 results</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Categories filter dengan design rapi - PERUBAHAN: Scroll horizontal -->
+      <section class="mb-6 sm:mb-10 fade-in-up" style="animation-delay: 250ms">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-3 sm:mb-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900">Filter by Category</h2>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">Click category to filter endpoints</p>
+          </div>
+          <button id="clear-filters" class="text-xs sm:text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-100 border border-gray-300 transition-colors w-full sm:w-auto">
+            Reset All Filters
+          </button>
+        </div>
+        <div id="categories-nav" class="flex flex-nowrap gap-2 overflow-x-auto pb-2">
+          <div class="category-filter rounded-lg w-20 h-8 animate-pulse flex-shrink-0"></div>
+          <div class="category-filter rounded-lg w-24 h-8 animate-pulse flex-shrink-0"></div>
+          <div class="category-filter rounded-lg w-16 h-8 animate-pulse flex-shrink-0"></div>
+        </div>
+      </section>
+      
+      <!-- Endpoints container -->
+      <section id="endpoints-container" class="space-y-4 sm:space-y-6">
+        <!-- Loading skeleton dengan animasi -->
+        <div class="endpoint-card rounded-lg p-4 sm:p-6">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0 mb-4">
+            <div class="space-y-2 sm:space-y-3 flex-1">
+              <div class="flex items-center gap-2 sm:gap-3">
+                <div class="h-5 sm:h-6 bg-gray-200 rounded w-12 sm:w-16 animate-pulse"></div>
+                <div class="h-3 sm:h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+              </div>
+              <div class="h-4 sm:h-5 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+            </div>
+            <div class="h-6 sm:h-8 bg-gray-200 rounded w-16 sm:w-20 animate-pulse self-end sm:self-auto"></div>
+          </div>
+          <div class="h-24 sm:h-32 bg-gray-100 rounded w-full animate-pulse"></div>
+        </div>
+      </section>
+      
+      <!-- Empty State dengan animasi -->
+      <div id="empty-state" class="hidden text-center py-12 sm:py-16 fade-in-up">
+        <div class="max-w-md mx-auto px-4">
+          <div class="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+            <svg class="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No Results Found</h3>
+          <p class="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">No endpoints match your search criteria.</p>
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
+            <button id="reset-search" class="px-4 sm:px-6 py-2 sm:py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors text-sm sm:text-base">
+              Reset Search
+            </button>
+            <button id="show-all" class="px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base">
+              Show All
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Load more button untuk pagination -->
+      <div id="load-more-container" class="hidden text-center mt-6 sm:mt-8">
+        <button id="load-more" class="px-5 sm:px-6 py-2 sm:py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base">
+          Load More Endpoints
+        </button>
+      </div>
+    </main>
+    
+    <!-- Footer minimalis -->
+    <footer class="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-200 text-center text-xs sm:text-sm text-gray-500">
+      <p>Documentation generated automatically. API responses may vary based on parameters.</p>
+      <p class="mt-1">Last updated: <span id="last-updated" class="font-medium">-</span></p>
+    </footer>
+  </div>
+  
+  <script>
+    let allEndpoints = [];
+    let openDetailId = null;
+    let activeCategory = 'all';
+    let currentSearchTerm = '';
+    let currentPage = 1;
+    const endpointsPerPage = 8;
+
+    const statusCodes = [
+      { code: 200, desc: "OK - Request successful", icon: "✓", color: "text-green-600" },
+      { code: 201, desc: "Created - Resource created successfully", icon: "✓", color: "text-green-600" },
+      { code: 204, desc: "No Content - Success without content", icon: "✓", color: "text-green-600" },
+      { code: 400, desc: "Bad Request - Invalid parameters or missing fields", icon: "!", color: "text-amber-600" },
+      { code: 401, desc: "Unauthorized - Authentication required", icon: "!", color: "text-amber-600" },
+      { code: 403, desc: "Forbidden - Access denied", icon: "!", color: "text-amber-600" },
+      { code: 404, desc: "Not Found - Resource not found", icon: "?", color: "text-blue-600" },
+      { code: 405, desc: "Method Not Allowed - HTTP method not supported", icon: "✗", color: "text-red-600" },
+      { code: 422, desc: "Unprocessable Entity - Validation failed", icon: "!", color: "text-amber-600" },
+      { code: 429, desc: "Too Many Requests - Rate limit exceeded", icon: "⚠", color: "text-amber-600" },
+      { code: 500, desc: "Internal Server Error - Server encountered an error", icon: "✗", color: "text-red-600" },
+    ];
+
+    // Utility functions
+    function formatJSON(json) {
+      if (typeof json === 'string') {
+        try {
+          return JSON.stringify(JSON.parse(json), null, 2);
+        } catch {
+          return json;
+        }
+      }
+      return JSON.stringify(json, null, 2);
+    }
+    
+    function getMethodStyle(method) {
+      const methodMap = {
+        'GET': { badge: 'method-badge-get', color: '#10b981' },
+        'POST': { badge: 'method-badge-post', color: '#3b82f6' },
+        'PUT': { badge: 'method-badge-put', color: '#f59e0b' },
+        'DELETE': { badge: 'method-badge-delete', color: '#ef4444' },
+        'PATCH': { badge: 'method-badge-patch', color: '#8b5cf6' },
+        'HEAD': { badge: 'bg-gray-600', color: '#6b7280' },
+        'OPTIONS': { badge: 'bg-gray-500', color: '#6b7280' }
+      };
+      return methodMap[method] || { badge: 'bg-gray-500', color: '#6b7280' };
+    }
+
+    function generateCurlCommand(api, params, url) {
+      let curl = `curl -X ${api.method}`;
+      
+      if (api.method === 'POST' || api.method === 'PUT' || api.method === 'PATCH') {
+        curl += ` \\\n  -H 'Content-Type: application/json'`;
+      }
+      
+      curl += ` \\\n  '${url}'`;
+      
+      if ((api.method === 'POST' || api.method === 'PUT' || api.method === 'PATCH') && Object.keys(params).length > 0) {
+        curl += ` \\\n  -d '${JSON.stringify(params)}'`;
+      }
+      
+      return curl;
+    }
+    
+    function animateCounter(element, target) {
+      const duration = 800;
+      const start = 0;
+      const increment = target / (duration / 16);
+      let current = start;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          element.textContent = target;
+          clearInterval(timer);
+        } else {
+          element.textContent = Math.floor(current);
+        }
+      }, 16);
+    }
+    
+    function updateStats() {
+      const totalEndpoints = allEndpoints.length;
+      const categories = [...new Set(allEndpoints.map(api => api.kategori || 'General'))];
+      const filtered = getFilteredEndpoints();
+      const filteredCount = filtered.length;
+      
+      // Update with animation
+      const totalEl = document.getElementById('total-endpoints');
+      const categoriesEl = document.getElementById('total-categories');
+      const filteredEl = document.getElementById('filtered-count');
+      
+      animateCounter(totalEl, totalEndpoints);
+      animateCounter(categoriesEl, categories.length);
+      animateCounter(filteredEl, filteredCount);
+      
+      document.getElementById('active-category').textContent = activeCategory === 'all' ? 'All' : activeCategory;
+      document.getElementById('last-updated').textContent = new Date().toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    
+    function getFilteredEndpoints() {
+      let filtered = allEndpoints;
+      
+      if (activeCategory !== 'all') {
+        filtered = filtered.filter(api => (api.kategori || 'General') === activeCategory);
+      }
+      
+      if (currentSearchTerm) {
+        const term = currentSearchTerm.toLowerCase();
+        filtered = filtered.filter(api => 
+          api.nama.toLowerCase().includes(term) ||
+          api.deskripsi.toLowerCase().includes(term) ||
+          api.endpoint.toLowerCase().includes(term) ||
+          (api.tags && api.tags.some(tag => tag.toLowerCase().includes(term)))
+        );
+      }
+      
+      return filtered;
+    }
+    
+    function renderCategories() {
+      const categoriesNav = document.getElementById('categories-nav');
+      const categories = ['all', ...new Set(allEndpoints.map(api => api.kategori || 'General'))];
+      
+      categoriesNav.innerHTML = categories.map(category => {
+        const count = category === 'all' 
+          ? allEndpoints.length 
+          : allEndpoints.filter(api => (api.kategori || 'General') === category).length;
+        
+        const isActive = category === activeCategory;
+        
+        return `
+          <button class="category-filter ${isActive ? 'active-filter' : ''}" 
+                  data-category="${category}">
+            ${category === 'all' ? 'All' : category} 
+            <span class="ml-1 text-xs opacity-80">(${count})</span>
+          </button>
+        `;
+      }).join('');
+      
+      document.querySelectorAll('.category-filter').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const category = this.dataset.category;
+          
+          if (category === activeCategory) return;
+          
+          activeCategory = category;
+          currentPage = 1;
+          
+          // Update UI
+          document.querySelectorAll('.category-filter').forEach(b => 
+            b.classList.remove('active-filter')
+          );
+          this.classList.add('active-filter');
+          
+          // Filter and render
+          filterEndpoints(currentSearchTerm);
+          
+          // Close any open detail
+          if (openDetailId) {
+            toggleDetail(openDetailId);
+          }
+          
+          updateStats();
+        });
+      });
+    }
+    
+    function filterEndpoints(searchTerm = '') {
+      currentSearchTerm = searchTerm;
+      const filtered = getFilteredEndpoints();
+      
+      renderEndpoints(filtered);
+      updateSearchCount(filtered.length);
+      updateStats();
+      updateLoadMoreButton(filtered.length);
+    }
+    
+    function updateSearchCount(count) {
+      const searchCount = document.getElementById('search-count');
+      searchCount.textContent = `${count} result${count !== 1 ? 's' : ''}`;
+      
+      if (count === 0 && (currentSearchTerm || activeCategory !== 'all')) {
+        document.getElementById('empty-state').classList.remove('hidden');
+        document.getElementById('endpoints-container').classList.add('hidden');
+      } else {
+        document.getElementById('empty-state').classList.add('hidden');
+        document.getElementById('endpoints-container').classList.remove('hidden');
+      }
+    }
+    
+    function updateLoadMoreButton(totalCount) {
+      const loadMoreContainer = document.getElementById('load-more-container');
+      if (totalCount > endpointsPerPage * currentPage) {
+        loadMoreContainer.classList.remove('hidden');
+      } else {
+        loadMoreContainer.classList.add('hidden');
+      }
+    }
+    
+    function loadAPIData() {
+      const container = document.getElementById('endpoints-container');
+      container.innerHTML = `
+        <div class="text-center py-12">
+          <div class="loading-dots inline-block mb-4">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <p class="text-gray-600">Loading endpoints...</p>
+        </div>
+      `;
+      
+      // Try multiple API endpoints
+      const apiEndpoints = ['/api/info', '/api/endpoints', '/api/docs'];
+      
+      const tryLoad = (index) => {
+        if (index >= apiEndpoints.length) {
+          showError();
+          return;
+        }
+        
+        fetch(apiEndpoints[index])
+          .then(async res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+          })
+          .then(data => {
+            allEndpoints = data.apis || data.endpoints || data || [];
+            renderCategories();
+            filterEndpoints();
+            
+            // Animate banner load jika ada
+            const banner = document.getElementById('api-banner');
+            if (banner && banner.complete && banner.naturalWidth > 0) {
+              banner.style.opacity = '0';
+              banner.style.transform = 'scale(0.98)';
+              setTimeout(() => {
+                banner.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                banner.style.opacity = '1';
+                banner.style.transform = 'scale(1)';
+              }, 100);
+            }
+          })
+          .catch(err => {
+            console.log(`Trying next endpoint, ${apiEndpoints[index]} failed:`, err);
+            tryLoad(index + 1);
+          });
+      };
+      
+      tryLoad(0);
+    }
+    
+    function showError() {
+      const container = document.getElementById('endpoints-container');
+      container.innerHTML = `
+        <div class="text-center py-12 bg-white rounded-xl border border-gray-200">
+          <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Failed to Load Data</h3>
+          <p class="text-gray-600 text-sm mb-4">Unable to connect to API server. Check your connection.</p>
+          <button onclick="loadAPIData()" 
+                  class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
+            Try Again
+          </button>
+        </div>
+      `;
+    }
+
+    function toggleDetail(id) {
+      const detail = document.getElementById(`detail-panel-${id}`);
+      const icon = document.getElementById(`toggle-icon-${id}`);
+      const card = document.getElementById(`endpoint-${id}`);
+      
+      if (openDetailId && openDetailId !== id) {
+        const prevDetail = document.getElementById(`detail-panel-${openDetailId}`);
+        const prevIcon = document.getElementById(`toggle-icon-${openDetailId}`);
+        const prevCard = document.getElementById(`endpoint-${openDetailId}`);
+        
+        if (prevDetail) {
+          prevDetail.style.animation = 'slideDown 0.3s ease-out reverse forwards';
+          setTimeout(() => {
+            prevDetail.classList.add('hidden');
+            prevDetail.style.animation = '';
+          }, 300);
+          prevIcon.textContent = '▼';
+          prevCard.classList.remove('border-gray-400');
+        }
+      }
+      
+      if (detail.classList.contains('hidden')) {
+        detail.classList.remove('hidden');
+        detail.style.animation = 'slideDown 0.4s ease-out forwards';
+        icon.textContent = '▲';
+        card.classList.add('border-gray-400');
+        openDetailId = id;
+        
+        // Scroll into view jika perlu
+        setTimeout(() => {
+          detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      } else {
+        detail.style.animation = 'slideDown 0.3s ease-out reverse forwards';
+        setTimeout(() => {
+          detail.classList.add('hidden');
+          detail.style.animation = '';
+        }, 300);
+        icon.textContent = '▼';
+        card.classList.remove('border-gray-400');
+        openDetailId = null;
+      }
+    }
+
+    function renderEndpoints(endpoints) {
+      const container = document.getElementById('endpoints-container');
+      const startIndex = (currentPage - 1) * endpointsPerPage;
+      const endIndex = startIndex + endpointsPerPage;
+      const endpointsToShow = endpoints.slice(startIndex, endIndex);
+      
+      if (endpointsToShow.length === 0 && currentPage === 1) {
+        container.innerHTML = '';
+        return;
+      }
+      
+      if (currentPage === 1) {
+        container.innerHTML = endpointsToShow.map((api, index) => renderEndpointCard(api, index)).join('');
+      } else {
+        const newCards = endpointsToShow.map((api, index) => renderEndpointCard(api, startIndex + index)).join('');
+        container.innerHTML += newCards;
+      }
+      
+      // Add event listeners for each endpoint
+      endpointsToShow.forEach((api, index) => {
+        const uniqueId = api.endpoint.replace(/[^a-zA-Z0-9]/g, '_') + '_' + (startIndex + index);
+        setTimeout(() => {
+          setupEndpointEvents(api, uniqueId);
+        }, index * 50);
+      });
+    }
+    
+    function renderEndpointCard(api, index) {
+      const uniqueId = api.endpoint.replace(/[^a-zA-Z0-9]/g, '_') + '_' + index;
+      const methodStyle = getMethodStyle(api.method);
+      const hasParams = api.parameter && api.parameter.length > 0;
+      
+      // Build parameter inputs
+      const paramInputs = hasParams ? api.parameter.map(param => `
+        <div class="space-y-1 sm:space-y-2">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+            <label class="text-sm font-medium text-gray-900">
+              ${param.nama}
+            </label>
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-0.5 sm:py-1 rounded ${param.required ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'}">
+                ${param.required ? 'required' : 'optional'}
+              </span>
+              <span class="text-xs text-gray-500">${param.tipe || 'string'}</span>
+            </div>
+          </div>
+          <input type="${param.tipe === 'number' ? 'number' : 'text'}" 
+                 class="param-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 outline-none text-sm"
+                 data-param="${param.nama}"
+                 data-type="${param.tipe || 'query'}"
+                 placeholder="${param.contoh || (param.tipe === 'number' ? '123' : 'value')}"
+                 ${param.required ? 'required' : ''}>
+          ${param.deskripsi ? `<p class="text-xs text-gray-500 mt-1">${param.deskripsi}</p>` : ''}
+        </div>
+      `).join('') : `
+        <div class="text-center py-3 sm:py-4 text-gray-500 text-sm">
+          No parameters required for this endpoint.
+        </div>
+      `;
+      
+      // Build status table
+      const statusTable = statusCodes.map((status, i) => `
+        <tr class="hover:bg-gray-50">
+          <td class="py-2 sm:py-3 px-3 sm:px-4">
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold ${status.color}">${status.icon}</span>
+              <code class="font-mono font-semibold text-gray-900">${status.code}</code>
+            </div>
+          </td>
+          <td class="py-2 sm:py-3 px-3 sm:px-4 text-gray-700 text-sm">${status.desc}</td>
+        </tr>
+      `).join('');
+      
+      return `
+        <div id="endpoint-${uniqueId}" class="endpoint-card bg-white rounded-lg sm:rounded-xl border border-gray-200"
+             style="animation-delay: ${index * 100}ms">
+          
+          <!-- Header -->
+          <div class="p-4 sm:p-6 cursor-pointer group" onclick="toggleDetail('${uniqueId}')">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-0">
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <span class="method-badge ${methodStyle.badge}">${api.method}</span>
+                  <code class="text-sm font-mono text-gray-900 wrap-url font-medium">${api.endpoint}</code>
+                </div>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-gray-700">${api.nama}</h3>
+                <p class="text-gray-600 text-sm sm:text-base">${api.deskripsi}</p>
+              </div>
+              <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
+                <span class="px-2 sm:px-3 py-1 text-xs font-medium bg-gray-50 text-gray-700 rounded-full border border-gray-200">
+                  ${api.kategori || 'General'}
+                </span>
+                <span id="toggle-icon-${uniqueId}" class="text-gray-400 text-base sm:text-lg transition-transform">▼</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Detail Panel -->
+          <div id="detail-panel-${uniqueId}" class="hidden border-t border-gray-200">
+            <div class="p-4 sm:p-6 space-y-6 sm:space-y-8">
+              
+              <!-- cURL Command -->
+              <section>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
+                  <h4 class="font-semibold text-gray-900 text-base sm:text-lg">cURL Command</h4>
+                  <button id="copy-curl-${uniqueId}" 
+                          class="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 transition-colors self-end sm:self-auto">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy
+                  </button>
+                </div>
+                <div class="relative">
+                  <pre id="curl-area-${uniqueId}" 
+                       class="bg-gray-900 text-gray-100 rounded-lg p-3 sm:p-4 overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed max-h-48 sm:max-h-96">
+${generateCurlCommand(api, {}, api.endpoint)}
+                  </pre>
+                </div>
+              </section>
+              
+              <!-- Tester -->
+              <section>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+                  <h4 class="font-semibold text-gray-900 text-base sm:text-lg">Try It Out</h4>
+                  <span class="text-xs text-gray-500 bg-gray-100 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full self-start sm:self-auto">Live Testing</span>
+                </div>
+                
+                ${hasParams ? `
+                  <div class="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg sm:rounded-xl border border-gray-200 space-y-4 sm:space-y-6">
+                    <h5 class="font-medium text-gray-900 text-sm sm:text-base">Parameters</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                      ${paramInputs}
+                    </div>
+                  </div>
+                ` : ''}
+                
+                <button id="execute-btn-${uniqueId}" 
+                        class="execute-btn w-full py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base mb-4 sm:mb-6">
+                  <span id="execute-text-${uniqueId}">Execute ${api.method} Request</span>
+                </button>
+                
+                <div class="space-y-3 sm:space-y-4">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+                    <h5 class="font-semibold text-gray-900 text-base sm:text-lg">Response</h5>
+                    <div class="flex items-center gap-3 sm:gap-4">
+                      <span id="response-time-${uniqueId}" class="text-xs text-gray-500"></span>
+                      <span id="response-status-${uniqueId}" class="text-xs font-medium"></span>
+                    </div>
+                  </div>
+                  <div class="relative group">
+                    <pre id="response-area-${uniqueId}" 
+                         class="bg-gray-900 text-gray-100 rounded-lg sm:rounded-xl p-3 sm:p-4 h-48 sm:h-80 overflow-auto text-xs sm:text-sm font-mono leading-relaxed">
+// Response will appear here after executing request
+                    </pre>
+                    <button id="copy-response-${uniqueId}" 
+                            class="absolute top-2 sm:top-4 right-2 sm:right-4 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity p-1 sm:p-2 rounded hover:bg-gray-800">
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                    <div id="response-loader-${uniqueId}" class="hidden absolute inset-0 bg-gray-900/80 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <div class="loading-dots text-white">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+              
+              <!-- Status Codes -->
+              <section>
+                <h4 class="font-semibold text-gray-900 text-base sm:text-lg mb-4 sm:mb-6">Status Codes</h4>
+                <div class="table-container">
+                  <div class="overflow-hidden rounded-lg sm:rounded-xl border border-gray-200">
+                    <table class="status-table w-full min-w-[300px]">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="py-2 sm:py-3 px-3 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Code</th>
+                          <th class="py-2 sm:py-3 px-3 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-100">
+                        ${statusTable}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function setupEndpointEvents(api, id) {
+      // Update cURL on parameter change
+      const paramInputs = document.querySelectorAll(`#endpoint-${id} .param-input`);
+      const curlArea = document.getElementById(`curl-area-${id}`);
+      
+      function updateCurl() {
+        let url = api.endpoint;
+        const params = {};
+        
+        paramInputs.forEach(input => {
+          const name = input.dataset.param;
+          const type = input.dataset.type;
+          const value = input.value.trim();
+          
+          if (value) {
+            if (api.method === 'GET' && type === 'query') {
+              params[name] = value;
+            } else if (api.method !== 'GET') {
+              params[name] = value;
+            }
+          }
+        });
+        
+        if (api.method === 'GET' && Object.keys(params).length > 0) {
+          const query = new URLSearchParams(params).toString();
+          url += '?' + query;
+        }
+        
+        const bodyParams = api.method === 'GET' ? {} : params;
+        curlArea.textContent = generateCurlCommand(api, bodyParams, url);
+      }
+      
+      paramInputs.forEach(input => {
+        input.addEventListener('input', updateCurl);
+        input.addEventListener('focus', () => {
+          input.classList.add('border-gray-900');
+        });
+        input.addEventListener('blur', () => {
+          input.classList.remove('border-gray-900');
+        });
+      });
+      
+      // Copy cURL
+      const copyCurlBtn = document.getElementById(`copy-curl-${id}`);
+      copyCurlBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(curlArea.textContent.trim()).then(() => {
+          copyCurlBtn.classList.add('copy-success');
+          copyCurlBtn.innerHTML = `
+            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Copied
+          `;
+          setTimeout(() => {
+            copyCurlBtn.classList.remove('copy-success');
+            copyCurlBtn.innerHTML = `
+              <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy
+            `;
+          }, 2000);
+        });
+      });
+      
+      // Execute request
+      const executeBtn = document.getElementById(`execute-btn-${id}`);
+      const executeText = document.getElementById(`execute-text-${id}`);
+      const responseArea = document.getElementById(`response-area-${id}`);
+      const responseTime = document.getElementById(`response-time-${id}`);
+      const responseStatus = document.getElementById(`response-status-${id}`);
+      const responseLoader = document.getElementById(`response-loader-${id}`);
+      
+      executeBtn.addEventListener('click', async () => {
+        // Validate required params
+        let isValid = true;
+        paramInputs.forEach(input => {
+          if (input.required && !input.value.trim()) {
+            isValid = false;
+            input.classList.add('border-red-500');
+            setTimeout(() => {
+              input.classList.remove('border-red-500');
+            }, 2000);
+          }
+        });
+        
+        if (!isValid) {
+          executeBtn.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+          executeText.textContent = 'Required Parameters Missing!';
+          setTimeout(() => {
+            executeBtn.style.background = '';
+            executeText.textContent = `Execute ${api.method} Request`;
+          }, 2000);
+          return;
+        }
+        
+        // Build URL and body
+        let url = api.endpoint;
+        const params = {};
+        const body = {};
+        
+        paramInputs.forEach(input => {
+          const name = input.dataset.param;
+          const type = input.dataset.type;
+          const value = input.value.trim();
+          
+          if (value) {
+            if (api.method === 'GET' && type === 'query') {
+              params[name] = value;
+            } else if (api.method !== 'GET') {
+              body[name] = value;
+            }
+          }
+        });
+        
+        if (api.method === 'GET' && Object.keys(params).length > 0) {
+          const query = new URLSearchParams(params).toString();
+          url += '?' + query;
+        }
+        
+        // UI state
+        executeBtn.disabled = true;
+        executeText.innerHTML = `
+          <div class="loading-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        `;
+        
+        if (responseLoader) {
+          responseLoader.classList.remove('hidden');
+        }
+        
+        responseArea.textContent = '';
+        responseTime.textContent = '';
+        responseStatus.textContent = '';
+        
+        const startTime = Date.now();
+        
+        try {
+          const options = {
+            method: api.method,
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          };
+          
+          if (api.method !== 'GET' && Object.keys(body).length > 0) {
+            options.body = JSON.stringify(body);
+          }
+          
+          const response = await fetch(url, options);
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+          
+          let data;
+          try {
+            data = await response.json();
+          } catch {
+            const text = await response.text();
+            data = { 
+              error: 'Invalid JSON response', 
+              raw: text,
+              statusCode: response.status,
+              contentType: response.headers.get('content-type')
+            };
+          }
+          
+          // Update UI
+          responseArea.textContent = formatJSON(data);
+          responseArea.style.animation = 'fadeInUp 0.3s ease';
+          responseTime.textContent = `${duration}ms`;
+          
+          const statusColor = response.ok ? 'text-green-600' : 'text-red-600';
+          const bgColor = response.ok ? 'bg-green-50' : 'bg-red-50';
+          responseStatus.innerHTML = `
+            <span class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full ${bgColor} ${statusColor} font-semibold text-xs">
+              ${response.status} ${response.statusText}
+            </span>
+          `;
+          
+        } catch (error) {
+          const endTime = Date.now();
+          responseArea.textContent = `Error: ${error.message}`;
+          responseTime.textContent = `${endTime - startTime}ms`;
+          responseStatus.innerHTML = '<span class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-red-50 text-red-600 font-semibold text-xs">Error</span>';
+        } finally {
+          executeBtn.disabled = false;
+          executeText.textContent = `Execute ${api.method} Request`;
+          
+          if (responseLoader) {
+            responseLoader.classList.add('hidden');
+          }
+        }
+      });
+      
+      // Copy response
+      document.getElementById(`copy-response-${id}`).addEventListener('click', () => {
+        navigator.clipboard.writeText(responseArea.textContent).then(() => {
+          const btn = document.getElementById(`copy-response-${id}`);
+          btn.innerHTML = `
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          `;
+          btn.classList.add('copy-success');
+          setTimeout(() => {
+            btn.innerHTML = `
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            `;
+            btn.classList.remove('copy-success');
+          }, 2000);
+        });
+      });
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAPIData();
+      
+      // Search functionality with debounce
+      const searchInput = document.getElementById('search-endpoints');
+      let searchTimeout;
+      
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        
+        searchTimeout = setTimeout(() => {
+          const term = e.target.value.toLowerCase().trim();
+          filterEndpoints(term);
+        }, 300);
+      });
+      
+      // Clear filters button
+      document.getElementById('clear-filters').addEventListener('click', () => {
+        activeCategory = 'all';
+        currentSearchTerm = '';
+        currentPage = 1;
+        searchInput.value = '';
+        
+        document.querySelectorAll('.category-filter').forEach(btn => 
+          btn.classList.remove('active-filter')
+        );
+        document.querySelector('[data-category="all"]')?.classList.add('active-filter');
+        
+        filterEndpoints();
+      });
+      
+      // Reset search button
+      document.getElementById('reset-search').addEventListener('click', () => {
+        searchInput.value = '';
+        filterEndpoints();
+        document.getElementById('empty-state').classList.add('hidden');
+        document.getElementById('endpoints-container').classList.remove('hidden');
+      });
+      
+      // Show all button
+      document.getElementById('show-all').addEventListener('click', () => {
+        activeCategory = 'all';
+        currentSearchTerm = '';
+        searchInput.value = '';
+        
+        document.querySelectorAll('.category-filter').forEach(btn => 
+          btn.classList.remove('active-filter')
+        );
+        document.querySelector('[data-category="all"]')?.classList.add('active-filter');
+        
+        filterEndpoints();
+      });
+      
+      // Expand all button
+      document.getElementById('expand-all').addEventListener('click', () => {
+        document.querySelectorAll('[id^="detail-panel-"]').forEach(panel => {
+          panel.classList.remove('hidden');
+          panel.style.animation = 'slideDown 0.4s ease-out forwards';
+        });
+        document.querySelectorAll('[id^="toggle-icon-"]').forEach(icon => {
+          icon.textContent = '▲';
+        });
+      });
+      
+      // Collapse all button
+      document.getElementById('collapse-all').addEventListener('click', () => {
+        document.querySelectorAll('[id^="detail-panel-"]').forEach(panel => {
+          panel.style.animation = 'slideDown 0.3s ease-out reverse forwards';
+          setTimeout(() => {
+            panel.classList.add('hidden');
+            panel.style.animation = '';
+          }, 300);
+        });
+        document.querySelectorAll('[id^="toggle-icon-"]').forEach(icon => {
+          icon.textContent = '▼';
+        });
+        openDetailId = null;
+      });
+      
+      // Export JSON button
+      document.getElementById('export-json').addEventListener('click', () => {
+        const dataStr = JSON.stringify(allEndpoints, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'api-endpoints.json';
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+      });
+      
+      // Load more button
+      document.getElementById('load-more').addEventListener('click', () => {
+        currentPage++;
+        const filtered = getFilteredEndpoints();
+        renderEndpoints(filtered);
+        updateLoadMoreButton(filtered.length);
+      });
+      
+      // Close detail when clicking outside
+      document.addEventListener('click', (e) => {
+        if (openDetailId && !e.target.closest(`#endpoint-${openDetailId}`)) {
+          toggleDetail(openDetailId);
+        }
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && openDetailId) {
+          toggleDetail(openDetailId);
+        }
+        if (e.key === '/' && e.target.tagName !== 'INPUT') {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
