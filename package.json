@@ -4,20 +4,27 @@
   "description": "REST API modular premium dengan auto plugin loading + frontend responsif Tailwind CDN",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "build": "echo \"No build step required\"",
     "dev": "nodemon server.js",
-    "build": "echo 'No build step required'",
+    "start": "node server.js",
     "vercel-build": "npm install"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "cors": "^2.8.5",
-    "morgan": "^1.10.0",
-    "express-rate-limit": "^7.4.0",
     "axios": "^1.6.8",
     "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "express-validator": "^7.1.0",
     "form-data": "^4.0.0",
+    "mime-types": "^2.1.35",
+    "moment-timezone": "^0.5.45",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
     "node-fetch": "^3.3.2",
+    "qs": "^6.12.1",
+    "uuid": "^9.0.1",
     "yt-search": "^2.11.1"
   },
   "devDependencies": {
