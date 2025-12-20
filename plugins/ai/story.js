@@ -8,7 +8,7 @@ module.exports = {
   desc: "Generate cerita AI berdasarkan prompt dan opsi",
   category: "AI",
   method: "POST",
-  path: "/ai/story",
+  path: "/story",
   params: ["prompt", "mode", "length", "creative", "language"],
 
   async run(req, res) {
