@@ -6,7 +6,7 @@ const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 module.exports = {
   name: "SoundCloud",
   desc: "Cari lagu SoundCloud dari query dan langsung download audio",
-  category: "Download",
+  category: "Search",
   method: "GET",
   path: "/soundcloud",
   params: ["q"],
